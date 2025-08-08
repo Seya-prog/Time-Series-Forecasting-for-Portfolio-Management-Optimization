@@ -1,0 +1,72 @@
+# Configuration file for Time Series Forecasting Portfolio Management
+
+# Data settings
+data:
+  start_date: "2015-01-01"
+  end_date: "2024-01-01"
+  symbols:
+    - "AAPL"
+    - "GOOGL"
+    - "MSFT"
+    - "AMZN"
+    - "TSLA"
+    - "NVDA"
+    - "META"
+    - "NFLX"
+  benchmark: "SPY"
+  data_source: "yfinance"
+  frequency: "daily"
+
+# Model settings
+models:
+  arima:
+    max_p: 5
+    max_d: 2
+    max_q: 5
+    seasonal: true
+  
+  lstm:
+    sequence_length: 60
+    hidden_units: 50
+    dropout: 0.2
+    epochs: 100
+    batch_size: 32
+  
+  prophet:
+    seasonality_mode: "multiplicative"
+    yearly_seasonality: true
+    weekly_seasonality: false
+    daily_seasonality: false
+
+# Portfolio optimization
+portfolio:
+  optimization_method: "mean_variance"  # mean_variance, risk_parity, black_litterman
+  risk_free_rate: 0.02
+  target_return: 0.12
+  max_weight: 0.3
+  min_weight: 0.01
+  rebalance_frequency: "monthly"
+
+# Backtesting
+backtesting:
+  initial_capital: 100000
+  transaction_cost: 0.001
+  start_date: "2020-01-01"
+  end_date: "2023-12-31"
+  benchmark: "SPY"
+
+# Risk management
+risk:
+  var_confidence: 0.05
+  cvar_confidence: 0.05
+  max_drawdown_threshold: 0.15
+  volatility_target: 0.15
+
+# Paths
+paths:
+  data_dir: "data/"
+  raw_data_dir: "data/raw/"
+  processed_data_dir: "data/processed/"
+  models_dir: "models/"
+  results_dir: "results/"
+  figures_dir: "results/figures/"
