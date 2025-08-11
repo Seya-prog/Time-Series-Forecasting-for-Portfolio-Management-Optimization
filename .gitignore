@@ -137,7 +137,27 @@ results/
 *.joblib
 *.h5
 *.hdf5
+*.keras
 *.csv
+
+# Specific trained model files
+models/tesla_arima_model.pkl
+models/tesla_forecaster_metadata.pkl
+models/tesla_lstm_metadata.pkl
+models/tesla_lstm_model.h5
+models/tesla_lstm_model.keras
+models/tesla_lstm_scaler.pkl
+
+# Training data (properly organized in data directory)
+data/processed/tesla_training_data.csv
+
+# Generated forecast outputs and reports
+results/figures/tesla_arima_future_forecast.png
+results/figures/tesla_future_forecasts.png
+results/tesla_arima_forecast_report.txt
+results/tesla_market_forecast_report.txt
+results/*_forecast_report.txt
+results/figures/*_forecast.png
 
 # IDE files
 .vscode/

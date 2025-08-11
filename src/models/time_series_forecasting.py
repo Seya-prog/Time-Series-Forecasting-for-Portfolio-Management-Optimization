@@ -5,14 +5,17 @@ This module implements ARIMA/SARIMA and LSTM models for forecasting Tesla's stoc
 Task 2: Develop Time Series Forecasting Models
 """
 
-import numpy as np
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from typing import Dict, Tuple, List, Optional
+from datetime import datetime
 import warnings
-from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional
 import logging
+import pickle
+import joblib
+import os
 
 # Statistical models
 from statsmodels.tsa.arima.model import ARIMA
@@ -566,6 +569,147 @@ class TimeSeriesForecaster:
             'metrics': self.metrics,
             'comparison': comparison
         }
+    
+    def save_models(self, models_dir: str = 'models') -> None:
+        """
+        Save trained models to disk for reuse in Task 3.
+        
+        Args:
+            models_dir: Directory to save models
+        """
+        # Create models directory if it doesn't exist
+        os.makedirs(models_dir, exist_ok=True)
+        
+        try:
+            # Save ARIMA model
+            if 'arima' in self.models:
+                arima_path = os.path.join(models_dir, 'tesla_arima_model.pkl')
+                with open(arima_path, 'wb') as f:
+                    pickle.dump(self.models['arima'], f)
+                print(f"✅ ARIMA model saved to {arima_path}")
+            
+            # Save LSTM model and related components
+            if 'lstm' in self.models:
+                lstm_info = self.models['lstm']
+                
+                # Save TensorFlow model (using modern Keras format)
+                lstm_model_path = os.path.join(models_dir, 'tesla_lstm_model.keras')
+                lstm_info['model'].save(lstm_model_path)
+                
+                # Save scaler
+                scaler_path = os.path.join(models_dir, 'tesla_lstm_scaler.pkl')
+                joblib.dump(lstm_info['scaler'], scaler_path)
+                
+                # Save LSTM metadata
+                lstm_metadata = {
+                    'sequence_length': lstm_info['sequence_length'],
+                    'target_column': self.target_column,
+                    'train_end_date': str(self.train_end_date) if hasattr(self, 'train_end_date') else None
+                }
+                metadata_path = os.path.join(models_dir, 'tesla_lstm_metadata.pkl')
+                with open(metadata_path, 'wb') as f:
+                    pickle.dump(lstm_metadata, f)
+                
+                print(f"✅ LSTM model saved to {lstm_model_path}")
+                print(f"✅ LSTM scaler saved to {scaler_path}")
+                print(f"✅ LSTM metadata saved to {metadata_path}")
+            
+            # Save data and forecaster metadata
+            forecaster_metadata = {
+                'target_column': self.target_column,
+                'train_end_date': str(self.train_end_date) if hasattr(self, 'train_end_date') else None,
+                'data_shape': self.data.shape,
+                'data_columns': list(self.data.columns),
+                'save_timestamp': datetime.now().isoformat()
+            }
+            
+            metadata_path = os.path.join(models_dir, 'tesla_forecaster_metadata.pkl')
+            with open(metadata_path, 'wb') as f:
+                pickle.dump(forecaster_metadata, f)
+            
+            # Save the processed data for Task 3 in proper data directory
+            os.makedirs('data/processed', exist_ok=True)
+            data_path = 'data/processed/tesla_training_data.csv'
+            self.data.to_csv(data_path)
+            
+            print(f"✅ Forecaster metadata saved to {metadata_path}")
+            print(f"✅ Training data saved to {data_path}")
+            print(f"🎯 All models successfully saved to '{models_dir}/' directory")
+            
+        except Exception as e:
+            print(f"❌ Error saving models: {str(e)}")
+    
+    @classmethod
+    def load_models(cls, models_dir: str = 'models') -> 'TimeSeriesForecaster':
+        """
+        Load trained models from disk for use in Task 3.
+        
+        Args:
+            models_dir: Directory containing saved models
+            
+        Returns:
+            TimeSeriesForecaster instance with loaded models
+        """
+        try:
+            # Load forecaster metadata
+            metadata_path = os.path.join(models_dir, 'tesla_forecaster_metadata.pkl')
+            with open(metadata_path, 'rb') as f:
+                metadata = pickle.load(f)
+            
+            # Load training data from proper data directory
+            data_path = 'data/processed/tesla_training_data.csv'
+            data = pd.read_csv(data_path, index_col=0, parse_dates=True)
+            
+            # Initialize forecaster
+            forecaster = cls(data=data, target_column=metadata['target_column'])
+            
+            # Set train_end_date if available
+            if metadata.get('train_end_date'):
+                forecaster.train_end_date = pd.to_datetime(metadata['train_end_date'])
+                forecaster.split_data(train_end_date=metadata['train_end_date'])
+            
+            print(f"✅ Loaded training data: {data.shape}")
+            print(f"✅ Target column: {metadata['target_column']}")
+            
+            # Load ARIMA model
+            arima_path = os.path.join(models_dir, 'tesla_arima_model.pkl')
+            if os.path.exists(arima_path):
+                with open(arima_path, 'rb') as f:
+                    forecaster.models['arima'] = pickle.load(f)
+                print(f"✅ ARIMA model loaded from {arima_path}")
+            
+            # Load LSTM model
+            lstm_model_path = os.path.join(models_dir, 'tesla_lstm_model.keras')
+            scaler_path = os.path.join(models_dir, 'tesla_lstm_scaler.pkl')
+            lstm_metadata_path = os.path.join(models_dir, 'tesla_lstm_metadata.pkl')
+            
+            if all(os.path.exists(p) for p in [lstm_model_path, scaler_path, lstm_metadata_path]):
+                from tensorflow.keras.models import load_model
+                
+                # Load LSTM components
+                lstm_model = load_model(lstm_model_path)
+                scaler = joblib.load(scaler_path)
+                
+                with open(lstm_metadata_path, 'rb') as f:
+                    lstm_metadata = pickle.load(f)
+                
+                forecaster.models['lstm'] = {
+                    'model': lstm_model,
+                    'scaler': scaler,
+                    'sequence_length': lstm_metadata['sequence_length']
+                }
+                
+                print(f"✅ LSTM model loaded from {lstm_model_path}")
+                print(f"✅ LSTM scaler loaded from {scaler_path}")
+            
+            print(f"🎯 All models successfully loaded from '{models_dir}/' directory")
+            print(f"📅 Models saved on: {metadata.get('save_timestamp', 'Unknown')}")
+            
+            return forecaster
+            
+        except Exception as e:
+            print(f"❌ Error loading models: {str(e)}")
+            raise
 
 
 def main():
@@ -653,8 +797,13 @@ def main():
         print("   - Model performance metrics")
         print("   - Confidence intervals (for ARIMA)")
         
+        # Save trained models
+        print("\n💾 Saving trained models...")
+        forecaster.save_models()
+        
         print("\n✅ Task 2 Implementation Complete!")
         print("   Both ARIMA and LSTM models have been successfully trained and evaluated.")
+        print("   Models saved for future use in Task 3.")
         
         return results
         
