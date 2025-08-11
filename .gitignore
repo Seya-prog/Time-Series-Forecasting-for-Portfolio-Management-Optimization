@@ -132,12 +132,12 @@ dmypy.json
 data/raw/
 data/processed/
 results/
-models/
-*.csv
+# models/ - Allow source code but ignore trained models
 *.pkl
 *.joblib
 *.h5
 *.hdf5
+*.csv
 
 # IDE files
 .vscode/

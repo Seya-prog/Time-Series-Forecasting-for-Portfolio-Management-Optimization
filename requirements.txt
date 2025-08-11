@@ -11,5 +11,18 @@ scipy>=1.7.0
 
 # Financial data
 yfinance>=0.1.70
+
+# Time series forecasting
+pmdarima>=2.0.0
+tensorflow
+
+# TensorFlow dependencies (required for Python 3.13 compatibility)
+absl-py
+ml-dtypes
+wrapt
+gast
+astunparse
+
+# Additional utilities
 tqdm
 pyyaml
