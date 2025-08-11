@@ -159,6 +159,10 @@ results/tesla_market_forecast_report.txt
 results/*_forecast_report.txt
 results/figures/*_forecast.png
 
+# Portfolio optimization outputs
+results/portfolio_optimization_report.txt
+results/figures/efficient_frontier.png
+
 # IDE files
 .vscode/
 .idea/
