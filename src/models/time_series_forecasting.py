@@ -1,25 +1,32 @@
 """
-Time Series Forecasting Models for Tesla Stock Price Prediction
+Time Series Forecasting for Tesla Stock Price Prediction
 
-This module implements ARIMA/SARIMA and LSTM models for forecasting Tesla's stock prices.
-Task 2: Develop Time Series Forecasting Models
+This module implements ARIMA/SARIMA and LSTM models for forecasting Tesla stock prices.
+It includes data preprocessing, model training, evaluation, and prediction capabilities.
 """
 
+import os
+# Set TensorFlow environment variables before any imports
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress all TensorFlow messages
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['PYTHONWARNINGS'] = 'ignore'
+os.environ['TF_DISABLE_SEGMENT_REDUCTION_OP_DETERMINISM_EXCEPTIONS'] = '1'
+
+import warnings
+import logging
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import datetime
-import warnings
-from typing import Dict, List, Tuple, Optional
-import logging
-import pickle
+from datetime import datetime, timedelta
 import joblib
-import os
+from pathlib import Path
+from typing import Tuple, Dict, List, Optional
 
 # Statistical models
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.stats.diagnostic import acorr_ljungbox
 from statsmodels.tsa.stattools import adfuller
 import statsmodels.api as sm
 
@@ -31,17 +38,28 @@ except ImportError:
     print("Warning: pmdarima not available. Using manual ARIMA parameter selection.")
     HAS_PMDARIMA = False
 
-# Deep learning models
+# Deep learning models - use TensorFlow v2 approach
 import tensorflow as tf
+
+# Suppress TensorFlow warnings and logging
+tf.get_logger().setLevel('ERROR')
+tf.autograph.set_verbosity(0)
+
+# Disable TensorFlow deprecation warnings
+import tensorflow.python.util.deprecation as deprecation
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-# Suppress warnings
+# Suppress all warnings
 warnings.filterwarnings('ignore')
-logging.basicConfig(level=logging.WARNING)
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 

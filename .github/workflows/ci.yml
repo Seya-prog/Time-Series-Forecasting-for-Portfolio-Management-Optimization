@@ -1,46 +1,138 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, task-* ]
+    branches: [ main, task*, develop ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
     
     steps:
     - uses: actions/checkout@v4
-      
-    - name: Set up Python
+    
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
-        
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-<<<<<<< HEAD
-        pip install pytest pandas numpy matplotlib scipy scikit-learn
-        pip install -r requirements.txt
-        
-    - name: Create directories
+        pip install pytest pytest-cov flake8 black isort mypy
+        pip install pandas numpy matplotlib seaborn scipy scikit-learn pmdarima yfinance joblib
+        pip install streamlit plotly shap
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Create necessary directories
       run: |
-        mkdir -p data/processed
-        mkdir -p results/figures
-        
-    - name: Run tests
+        mkdir -p data/{raw,processed} models results/{figures,reports} logs tests/fixtures
+    
+    - name: Code formatting check
       run: |
-        python -m pytest tests/ -v --tb=short
-=======
-        pip install pytest
-        pip install -r requirements.txt
-        
-    - name: Run tests
+        black --check --diff src/ tests/
+        isort --check-only --diff src/ tests/
+    
+    - name: Type checking
       run: |
-        python -m pytest tests/ -v
->>>>>>> 5f591797f77f02ab75f63f74001dbb0f1ce32d7d
-        
-    - name: Code quality check
+        mypy src/ --ignore-missing-imports --no-strict-optional
+    
+    - name: Lint with flake8
       run: |
-        pip install flake8
-        flake8 src/ --max-line-length=120 --ignore=E501,W503,W293,F401,E226,W504,F541,W291,E231,E303 --count || true
+        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/ tests/ --count --max-line-length=120 --ignore=E203,W503,E501 --statistics
+    
+    - name: Run tests with coverage
+      run: |
+        pytest tests/ -v --cov=src --cov-report=xml --cov-report=html --cov-fail-under=70
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+    
+    - name: Security scan
+      run: |
+        pip install bandit safety
+        bandit -r src/ -f json -o bandit-report.json || true
+        safety check --json --output safety-report.json || true
+    
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          htmlcov/
+          bandit-report.json
+          safety-report.json
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+  deploy-docs:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install documentation dependencies
+      run: |
+        pip install mkdocs mkdocs-material mkdocstrings[python]
+    
+    - name: Build documentation
+      run: |
+        mkdocs build
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
