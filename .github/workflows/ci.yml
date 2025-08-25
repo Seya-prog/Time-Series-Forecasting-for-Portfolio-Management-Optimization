@@ -1,7 +1,11 @@
 name: CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
+    branches: [ main, task*, develop ]
+  pull_request:
+    branches: [ main ]
     branches: [ main, task*, develop ]
   pull_request:
     branches: [ main ]
@@ -9,6 +13,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
     strategy:
       matrix:
         python-version: [3.9, 3.10, 3.11]
@@ -101,6 +108,10 @@ jobs:
         pip install build twine
     
     - name: Build package
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build package
       run: |
         python -m build
     
@@ -125,6 +136,9 @@ jobs:
     
     - name: Install documentation dependencies
       run: |
+        pip install mkdocs mkdocs-material mkdocstrings[python]
+    
+    - name: Build documentation
         pip install mkdocs mkdocs-material mkdocstrings[python]
     
     - name: Build documentation
