@@ -548,6 +548,7 @@ class ARIMAFutureForecaster:
         plot_path = "results/figures/tesla_arima_future_forecast.png"
         plt.savefig(plot_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
         print(f"\nARIMA forecast plot saved as '{plot_path}'")
 

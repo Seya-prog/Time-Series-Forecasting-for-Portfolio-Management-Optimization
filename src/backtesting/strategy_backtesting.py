@@ -124,7 +124,8 @@ class StrategyBacktester:
 
             # Find the weights section for Maximum Sharpe Ratio portfolio
             weights_section = re.search(
-                r"A\) MAXIMUM SHARPE RATIO PORTFOLIO.*?Asset Allocation:(.*?)(?=\n\n|\nB\))",
+                r"A\) MAXIMUM SHARPE RATIO PORTFOLIO.*?Asset Allocation:"
+                r"(.*?)(?=\n\n|\nB\))",
                 report_content,
                 re.DOTALL,
             )
@@ -320,6 +321,7 @@ class StrategyBacktester:
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
         print(f"✅ Performance comparison plot saved as '{save_path}'")
 
@@ -341,7 +343,8 @@ class StrategyBacktester:
         report.append(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         report.append(f"Backtesting Strategy: {self.strategy_name}")
         report.append(
-            f"Backtesting Period: {self.backtest_data.index[0].date()} to {self.backtest_data.index[-1].date()}"
+            f"Backtesting Period: {self.backtest_data.index[0].date()} to "
+            f"{self.backtest_data.index[-1].date()}"
         )
         report.append(f"Trading Days: {len(self.backtest_data)}")
         report.append("")
@@ -488,9 +491,15 @@ class StrategyBacktester:
         report.append("")
 
         if positive_factors >= 2:
-            model_assessment = "The model-driven approach demonstrates value in portfolio construction."
+            model_assessment = (
+                "The model-driven approach demonstrates value in "
+                "portfolio construction."
+            )
         else:
-            model_assessment = "The model-driven approach requires refinement for practical application."
+            model_assessment = (
+                "The model-driven approach requires refinement for "
+                "practical application."
+            )
 
         report.append(f"ASSESSMENT: {model_assessment}")
         report.append("")
@@ -588,7 +597,8 @@ def main():
 
         print(f"\nBacktesting report saved as '{report_path}'")
         print(
-            "Performance comparison plot saved as 'results/figures/backtest_performance.png'"
+            "Performance comparison plot saved as "
+            "'results/figures/backtest_performance.png'"
         )
 
     except Exception as e:

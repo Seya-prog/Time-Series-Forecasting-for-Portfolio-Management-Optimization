@@ -253,7 +253,8 @@ class TestBusinessRules(unittest.TestCase):
                 {}, {"max_single_asset_weight": 0.5, "min_assets": 2}
             )
 
-        # Test negative weights - function doesn't check for negative weights, so this should pass
+        # Test negative weights - function doesn't check for negative weights,
+        # so this should pass
         weights = {"TSLA": -0.1, "SPY": 0.6, "BND": 0.5}
         try:
             result = validate_business_rules(
@@ -264,7 +265,8 @@ class TestBusinessRules(unittest.TestCase):
             # If it raises an exception, that's also valid behavior
             pass
 
-        # Test weights not summing to 1 - function doesn't check sum, so this should pass
+        # Test weights not summing to 1 - function doesn't check sum,
+        # so this should pass
         weights = {"TSLA": 0.3, "SPY": 0.3, "BND": 0.3}
         result = validate_business_rules(
             weights, {"max_single_asset_weight": 0.5, "min_assets": 2}

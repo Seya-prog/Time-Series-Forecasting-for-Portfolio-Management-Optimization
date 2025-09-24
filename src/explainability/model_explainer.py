@@ -17,6 +17,14 @@ from ..config import config
 from ..utils.logging_config import log_performance, setup_logging
 
 warnings.filterwarnings("ignore")
+# Suppress sklearn deprecation warnings specifically
+warnings.filterwarnings(
+    "ignore", message=".*force_all_finite.*", category=FutureWarning
+)
+warnings.filterwarnings(
+    "ignore", message=".*ensure_all_finite.*", category=FutureWarning
+)
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 logger = setup_logging("model_explainer")
 

@@ -92,21 +92,29 @@ class FinancialDataCollector:
                 "name": "Tesla Inc.",
                 "sector": "Consumer Discretionary",
                 "industry": "Automobile Manufacturing",
-                "description": "High-growth, high-risk stock in the consumer discretionary sector",
+                "description": (
+                    "High-growth, high-risk stock in the consumer discretionary sector"
+                ),
                 "risk_profile": "High Risk, High Return Potential",
             },
             "BND": {
                 "name": "Vanguard Total Bond Market ETF",
                 "sector": "Fixed Income",
                 "industry": "Bond ETF",
-                "description": "Bond ETF tracking U.S. investment-grade bonds, providing stability and income",
+                "description": (
+                    "Bond ETF tracking U.S. investment-grade bonds, "
+                    "providing stability and income"
+                ),
                 "risk_profile": "Low Risk, Stable Returns",
             },
             "SPY": {
                 "name": "SPDR S&P 500 ETF Trust",
                 "sector": "Equity",
                 "industry": "Broad Market ETF",
-                "description": "ETF tracking the S&P 500 Index, offering broad U.S. market exposure",
+                "description": (
+                    "ETF tracking the S&P 500 Index, "
+                    "offering broad U.S. market exposure"
+                ),
                 "risk_profile": "Moderate Risk, Market Returns",
             },
         }

@@ -61,7 +61,8 @@ class PortfolioLogger:
 
         # Formatters
         detailed_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+            "%(asctime)s - %(name)s - %(levelname)s - "
+            "%(filename)s:%(lineno)d - %(message)s"
         )
         console_formatter = ColoredFormatter(
             "%(asctime)s - %(levelname)s - %(message)s", datefmt="%H:%M:%S"

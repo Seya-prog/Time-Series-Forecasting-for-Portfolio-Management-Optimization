@@ -71,7 +71,8 @@ class DataValidator:
         extreme_returns = abs(returns) > max_daily_return
         if extreme_returns.any():
             logger.warning(
-                f"Found {extreme_returns.sum()} extreme returns (>{max_daily_return * 100}%)"
+                f"Found {extreme_returns.sum()} extreme returns "
+                f"(>{max_daily_return * 100}%)"
             )
 
         # Check for infinite or NaN values

@@ -411,7 +411,8 @@ def show_forecasting(data, assets, forecast_months):
         except Exception as e:
             st.error(f"Forecasting failed: {str(e)}")
             st.info(
-                "This is a demo forecasting module. For production use, integrate with your trained ARIMA models."
+                "This is a demo forecasting module. For production use, "
+                "integrate with your trained ARIMA models."
             )
 
             # Show a simple chart anyway
@@ -654,10 +655,12 @@ def show_backtesting(data, assets):
                 benchmark_vol = benchmark_returns.std() * np.sqrt(252) * 100
 
                 # Display metrics
+                strategy_return_pct = strategy_metrics["total_return"] * 100
+                return_diff = strategy_return_pct - benchmark_total_return
                 st.metric(
                     "Total Return",
-                    f"{strategy_metrics['total_return'] * 100:.2f}%",
-                    f"{strategy_metrics['total_return'] * 100 - benchmark_total_return:.2f}%",
+                    f"{strategy_return_pct:.2f}%",
+                    f"{return_diff:.2f}%",
                 )
 
                 st.metric(

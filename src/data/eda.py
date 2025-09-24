@@ -70,6 +70,7 @@ class FinancialEDA:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
     def plot_returns_analysis(self, save_path: Optional[str] = None) -> None:
         """Analyze and plot daily returns."""
@@ -117,6 +118,7 @@ class FinancialEDA:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
     def plot_volatility_analysis(self, save_path: Optional[str] = None) -> None:
         """Analyze and plot volatility patterns."""
@@ -147,6 +149,7 @@ class FinancialEDA:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
     def detect_outliers(self) -> Dict[str, Dict]:
         """Detect outliers in daily returns using statistical methods."""
@@ -208,6 +211,7 @@ class FinancialEDA:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
         return correlation_matrix
 

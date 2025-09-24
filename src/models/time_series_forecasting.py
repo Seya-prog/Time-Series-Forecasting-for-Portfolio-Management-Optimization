@@ -38,6 +38,10 @@ from statsmodels.tsa.stattools import adfuller
 warnings.filterwarnings(
     "ignore", message=".*force_all_finite.*", category=FutureWarning
 )
+warnings.filterwarnings(
+    "ignore", message=".*ensure_all_finite.*", category=FutureWarning
+)
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 # Set TensorFlow environment variables to suppress warnings
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -47,10 +51,7 @@ os.environ["TF_DISABLE_SEGMENT_REDUCTION_OP_DETERMINISM_EXCEPTIONS"] = "1"
 
 # Import TensorFlow components after setting environment variables
 try:
-    from tensorflow.keras.layers import LSTM, Dense, Dropout
-    from tensorflow.keras.models import Sequential
-    from tensorflow.keras.optimizers import Adam
-
+    # TensorFlow imports will be added when LSTM functionality is implemented
     # Configure TensorFlow logging
     if tf is not None:
         tf.get_logger().setLevel("ERROR")
@@ -113,11 +114,13 @@ class TimeSeriesForecaster:
 
         if self.train_data is not None and not self.train_data.empty:
             logger.info(
-                f"Training data: {len(self.train_data)} points ({self.train_data.index.min()} to {self.train_data.index.max()})"
+                f"Training data: {len(self.train_data)} points "
+                f"({self.train_data.index.min()} to {self.train_data.index.max()})"
             )
         if self.test_data is not None and not self.test_data.empty:
             logger.info(
-                f"Testing data: {len(self.test_data)} points ({self.test_data.index.min()} to {self.test_data.index.max()})"
+                f"Testing data: {len(self.test_data)} points "
+                f"({self.test_data.index.min()} to {self.test_data.index.max()})"
             )
 
         print("Data split completed")
@@ -226,7 +229,8 @@ class TimeSeriesForecaster:
 
             if auto_arima is None:
                 print(
-                    "Warning: pmdarima not available. Using default ARIMA(1,1,1) parameters."
+                    "Warning: pmdarima not available. "
+                    "Using default ARIMA(1,1,1) parameters."
                 )
                 # Use default ARIMA parameters
                 fitted_model = ARIMA(series, order=(1, 1, 1)).fit()
@@ -422,7 +426,8 @@ class TimeSeriesForecaster:
 
         if tf is None:
             raise ImportError(
-                "TensorFlow is not installed. Please install tensorflow to use LSTM models."
+                "TensorFlow is not installed. "
+                "Please install tensorflow to use LSTM models."
             )
 
         # Build LSTM model with explicit dtype to avoid conversion warnings
@@ -513,7 +518,8 @@ class TimeSeriesForecaster:
             # Predict next value - convert to proper tensor format
             X_pred_tf = tf.convert_to_tensor(X_pred, dtype=tf.float32)
 
-            # Get prediction and convert to numpy immediately to avoid scalar conversion warnings
+            # Get prediction and convert to numpy immediately to avoid
+            # scalar conversion warnings
             pred_tensor = model(X_pred_tf, training=False)
             pred_numpy = pred_tensor.numpy()
             pred_scaled = pred_numpy[0, 0]
@@ -660,7 +666,11 @@ class TimeSeriesForecaster:
             # Add metrics to plot
             if model_name in self.metrics:
                 metrics = self.metrics[model_name]
-                textstr = f"MAE: {metrics['MAE']:.2f}\nRMSE: {metrics['RMSE']:.2f}\nMAPE: {metrics['MAPE']:.2f}%"
+                textstr = (
+                    f"MAE: {metrics['MAE']:.2f}\n"
+                    f"RMSE: {metrics['RMSE']:.2f}\n"
+                    f"MAPE: {metrics['MAPE']:.2f}%"
+                )
                 ax.text(
                     0.02,
                     0.98,
@@ -673,6 +683,7 @@ class TimeSeriesForecaster:
 
         plt.tight_layout()
         plt.show()
+        plt.close()  # Close the figure to free memory
 
     def run_complete_analysis(
         self, auto_arima: bool = True, lstm_epochs: int = 100
@@ -906,7 +917,8 @@ def main():
             f"✅ Successfully loaded {len(tesla_processed)} Tesla processed data points"
         )
         print(
-            f"   Date range: {tesla_processed.index.min().date()} to {tesla_processed.index.max().date()}"
+            f"   Date range: {tesla_processed.index.min().date()} to "
+            f"{tesla_processed.index.max().date()}"
         )
         print(f"   Available columns: {list(tesla_processed.columns)}")
 
@@ -974,7 +986,8 @@ def main():
 
         print("\n✅ Task 2 Implementation Complete!")
         print(
-            "   Both ARIMA and LSTM models have been successfully trained and evaluated."
+            "   Both ARIMA and LSTM models have been successfully "
+            "trained and evaluated."
         )
         print("   Models saved for future use in Task 3.")
 

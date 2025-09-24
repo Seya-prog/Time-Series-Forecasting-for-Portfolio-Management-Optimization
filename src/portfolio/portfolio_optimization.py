@@ -71,7 +71,8 @@ class PortfolioOptimizer:
 
             self.historical_data = data
             print(
-                f"✅ Loaded processed data from {data.index[0].date()} to {data.index[-1].date()}"
+                f"✅ Loaded processed data from {data.index[0].date()} to "
+                f"{data.index[-1].date()}"
             )
             print(f"📊 Data shape: {data.shape}")
 
@@ -131,19 +132,22 @@ class PortfolioOptimizer:
                 if tsla_forecast_return is not None:
                     self.expected_returns[asset] = tsla_forecast_return
                     print(
-                        f"📊 TSLA: Using ARIMA forecast return: {tsla_forecast_return:.2%}"
+                        f"📊 TSLA: Using ARIMA forecast return: "
+                        f"{tsla_forecast_return:.2%}"
                     )
                 else:
                     # Fallback to historical if no forecast provided
                     self.expected_returns[asset] = historical_annual_returns[asset]
                     print(
-                        f"⚠️  TSLA: No ARIMA forecast provided, using historical: {historical_annual_returns[asset]:.2%}"
+                        f"⚠️  TSLA: No ARIMA forecast provided, using historical: "
+                        f"{historical_annual_returns[asset]:.2%}"
                     )
             else:
                 # Use historical average for BND and SPY (Task 4 requirement)
                 self.expected_returns[asset] = historical_annual_returns[asset]
                 print(
-                    f"📈 {asset}: Using historical average return: {historical_annual_returns[asset]:.2%}"
+                    f"📈 {asset}: Using historical average return: "
+                    f"{historical_annual_returns[asset]:.2%}"
                 )
 
         print("\n✅ Final Expected Annual Returns:")
@@ -342,7 +346,8 @@ class PortfolioOptimizer:
         """
         if self.efficient_frontier is None:
             raise ValueError(
-                "Efficient frontier not generated. Call generate_efficient_frontier() first."
+                "Efficient frontier not generated. "
+                "Call generate_efficient_frontier() first."
             )
 
         print("Plotting efficient frontier...")
@@ -375,7 +380,8 @@ class PortfolioOptimizer:
                 marker="*",
                 color="red",
                 s=500,
-                label=f"Max Sharpe Ratio\n(SR: {self.optimal_portfolios['max_sharpe']['sharpe_ratio']:.3f})",
+                label=f"Max Sharpe Ratio\n"
+                f"(SR: {self.optimal_portfolios['max_sharpe']['sharpe_ratio']:.3f})",
             )
 
             # Minimum Volatility
@@ -385,7 +391,8 @@ class PortfolioOptimizer:
                 marker="*",
                 color="blue",
                 s=500,
-                label=f"Min Volatility\n(Vol: {self.optimal_portfolios['min_volatility']['volatility']:.2%})",
+                label=f"Min Volatility\n"
+                f"(Vol: {self.optimal_portfolios['min_volatility']['volatility']:.2%})",
             )
 
         plt.xlabel("Volatility (Risk)", fontsize=12)
@@ -409,6 +416,7 @@ class PortfolioOptimizer:
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.show()
+        plt.close()  # Close the figure to free memory
 
         print(f"✅ Efficient frontier plot saved as '{save_path}'")
 
@@ -426,10 +434,7 @@ class PortfolioOptimizer:
         report.append("PORTFOLIO OPTIMIZATION REPORT - TASK 4")
         report.append("Modern Portfolio Theory (MPT) Analysis")
         report.append("=" * 80)
-        report.append(
-            f"Generated on: {
-                datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
+        report.append(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         report.append(f"Assets analyzed: {', '.join(self.assets)}")
         report.append(f"Risk-free rate: {self.risk_free_rate:.2%}")
         report.append("")
@@ -439,10 +444,7 @@ class PortfolioOptimizer:
         report.append("-" * 40)
         for asset in self.assets:
             source = "ARIMA Forecast" if asset == "TSLA" else "Historical Average"
-            report.append(
-                f"{asset}: {
-                    self.expected_returns[asset]:.2%} ({source})"
-            )
+            report.append(f"{asset}: {self.expected_returns[asset]:.2%} ({source})")
         report.append("")
 
         # Risk Analysis Section
@@ -496,7 +498,10 @@ class PortfolioOptimizer:
         if recommended_portfolio == "max_sharpe":
             recommended = max_sharpe
             portfolio_name = "Maximum Sharpe Ratio Portfolio"
-            justification = "This portfolio maximizes risk-adjusted returns and is optimal for investors seeking the best return per unit of risk."
+            justification = (
+                "This portfolio maximizes risk-adjusted returns and is optimal for "
+                "investors seeking the best return per unit of risk."
+            )
         else:
             recommended = min_vol
             portfolio_name = "Minimum Volatility Portfolio"
@@ -529,7 +534,8 @@ class PortfolioOptimizer:
             "Diversification Benefit: Achieved through multi-asset allocation"
         )
         report.append(
-            f"Maximum Drawdown Risk: Estimated at {recommended['volatility'] * 3:.1%} (3-sigma)"
+            f"Maximum Drawdown Risk: Estimated at "
+            f"{recommended['volatility'] * 3:.1%} (3-sigma)"
         )
         report.append("")
 
@@ -580,15 +586,15 @@ def main():
             if expected_return_match:
                 tsla_arima_forecast = float(expected_return_match.group(1)) / 100
                 print(
-                    f"📊 Extracted ARIMA forecast from Task 3: {
-                        tsla_arima_forecast:.2%}"
+                    f"📊 Extracted ARIMA forecast from Task 3: {tsla_arima_forecast:.2%}"
                 )
 
                 # Handle edge case: if ARIMA predicts 0% return, use a small
                 # positive value for optimization
                 if tsla_arima_forecast == 0.0:
                     print(
-                        "⚠️  ARIMA predicts 0% return (stable prices). Using 2% for portfolio optimization."
+                        "⚠️  ARIMA predicts 0% return (stable prices). "
+                        "Using 2% for portfolio optimization."
                     )
                     tsla_arima_forecast = 0.02  # 2% minimal return assumption
             else:
